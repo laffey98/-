@@ -273,7 +273,7 @@ void Sha256Calculate(void const* Buffer,   // [in]
 
 int check(SHA256_HASH p) {
     int i = 0;
-    for (i = 0; i < 2; i++) {
+    for (i = 0; i < 1; i++) {
         if (((int)p.bytes[i]) == 0)
             ;
         else
