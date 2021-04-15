@@ -285,20 +285,21 @@ int main() {
     Sha256Calculate(buf, sizeof(bu), &p);
     int i;
     for (i = 0; i < 32; i++) {
-        printf("%0x", p.bytes[i]);
+        printf("%02x", p.bytes[i]);
     }
-    /*for (int n = 0; n < 32; n++) {
+   for (int n = 0; n < 32; n++) {
         if (p.bytes[n] != 0) {
             for (int c = 7; c > 0; c--) {
-                if ((p.bytes[n] >> 1) == 0) {
+                p.bytes[n] >>= 1;
+                if (p.bytes[n] == 0) {
                     v = v + c;
                     break;
                 }
             }
             break;
         }
-        v += 4;
+        v += 8;
     }
-    printf("\nit has %d bits 0 in the front of the result.", v);*/
+    printf("\nit has %d bits 0 in the front of the result.", v);
     return 0;
 }
