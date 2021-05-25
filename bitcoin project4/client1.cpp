@@ -7,10 +7,10 @@
 
 int send_data = 0;
 SOCKET sclient;
-char sendData[999]="dataaaaaaaa";
+char sendData[999] = "1000000000";
 
 void calcu(char* a) {
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 2; i++) {
         printf("%s\n", a);
         sleep(1);
         pthread_testcancel();
@@ -20,8 +20,10 @@ void calcu(char* a) {
 void* calculate(void* rev) {
     char* as = (char*)rev;
     calcu(as);  // pthread_testcancel();
-    send(sclient, sendData, strlen(sendData), 0);
-    printf("send over\n");
+    if (send(sclient, sendData, strlen(sendData), 0) > 0)
+        printf("send over\n");
+    else
+        printf("send defealt\n");
     send_data = 1;
     pthread_exit(NULL);
 }
@@ -68,7 +70,8 @@ int main(int argc, char* argv[]) {
             rev[ret] = 0x00;
             // printf(recData);
             printf("%s\n", rev);
-        }
+        } else
+            printf("rev defealt\n");
         if (strcmp(rev, "ok") == 0) {
             printf("ok rev\n");
             if ((f_pt == 1) && (send_data == 0)) {
@@ -80,7 +83,8 @@ int main(int argc, char* argv[]) {
                 rev[ret] = 0x00;
                 // printf(recData);
                 printf("%s\n", rev);
-            }
+            } else
+                printf("rev defealt\n");
         }
         f_pt = 1;
         printf("calcu start\n");

@@ -31,7 +31,7 @@ void* rev_pthr(void* ss) {
         printf(revData);
         printf("\n");
     }
-    printf("s:%d\n", s);
+    //printf("s:%d\n", s);
     p[s] = 1;
     flag = 1;
     pthread_exit(NULL);
@@ -57,9 +57,9 @@ void* acc_pthr(void* s) {
 //向所有客户端发送信息
 void send_to_cli(int cli1) {
     char sendData[20] = "hello world!\n";
-    for (int ss = 0; ss < cli; ss++) {
-        send(sClient[ss], sendData, strlen(sendData), 0);
-        printf("%dsend over\n", ss);
+    for (int ss = 0; ss < cli1; ss++) {
+        if (send(sClient[ss], sendData, strlen(sendData), 0) > 0)
+            /*printf("%dsend over\n", ss)*/;
         // sleep(1);
     }
 }
@@ -110,16 +110,17 @@ int main(int argc, char* argv[]) {
 
     pthread_t acc;
     pthread_create(&acc, NULL, acc_pthr, &slisten);
+    sleep(4);
     for (int i; i < num; i++) {
         sleep(4);
         int cli1 = cli;
-        printf("cli::%d cli1:%d\n", cli, cli1);
+        //printf("cli::%d cli1:%d\n", cli, cli1);
         printf("sleep over\n");
         send_to_cli(cli1);
         flag = 0;
         while (1) {
             if (flag == 1) {
-                printf("cli1:%d p[0]:%d\n", cli1, p[0]);
+                // printf("cli1:%d p[0]:%d\n", cli1, p[0]);
                 for (int ss = 0; ss < cli1; ss++) {
                     if (p[ss] == 1) {
                         pthread_create(&rev[ss], NULL, rev_pthr, &ss);
@@ -129,11 +130,11 @@ int main(int argc, char* argv[]) {
                     send(sClient[ss], "ok", strlen("ok"), 0);
                 }
                 create_block(i);
-                sleep(5);
+                //sleep(5);
                 break;
             }
         }
-        //sleep(4);
+        // sleep(4);
     }
     /*sClient = accept(slisten, (SOCKADDR*)&remoteAddr, &nAddrlen);
     if (sClient == INVALID_SOCKET) {
@@ -178,7 +179,7 @@ int main(int argc, char* argv[]) {
     }
     */
     printf("ooooooooooooover\n");
-    sleep(5);
+    sleep(10);
     getchar();
     for (int i = 0; i < cli; i++) {
         closesocket(sClient[i]);
