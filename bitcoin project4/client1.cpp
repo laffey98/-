@@ -3,24 +3,45 @@
 #include <unistd.h>
 #include <winsock2.h>
 #include <windows.h>
+
+#include "sha256.cpp"
 #pragma comment(lib, "ws2_32.lib")
 
 int send_data = 0;
 SOCKET sclient;
-char sendData[999] = "1000000000";
+// char sendData[999] = "1000000000";
+block buf;
 
 void calcu(char* a) {
+    SHA256_HASH p;
+    int x =rand()%600 , y = 0;
+    do {
+        buf.Nonce_2[y / 256]++;
+        y++;
+        if (y == 256 * 8 - 1) {
+            buf.Nonce_1[x / 256]++;
+            x++;
+            y = 0;
+        }
+        if (x == 256 * 8 - 1) {
+            printf("sha256 is failed!");
+            //pthread_exit(NULL);
+        }
+        Sha256Calculate(&buf, sizeof(buf), &p);
+    } while (check(p) == 0);
     for (int i = 0; i < 2; i++) {
-        printf("%s\n", a);
-        sleep(1);
+        // printf("%s\n", a);
+        printf("123");
+        //sleep(1);
         pthread_testcancel();
     }
+    //pthread_exit(NULL);
 }
 
 void* calculate(void* rev) {
-    char* as = (char*)rev;
-    calcu(as);  // pthread_testcancel();
-    if (send(sclient, sendData, strlen(sendData), 0) > 0)
+    //char* as = (char*)rev;
+    calcu(NULL);  // pthread_testcancel();
+    if (send(sclient, (char*)(&(buf.Nonce_2)), sizeof(buf.Nonce_2), 0) > 0)
         printf("send over\n");
     else
         printf("send defealt\n");
@@ -56,39 +77,41 @@ int main(int argc, char* argv[]) {
     }
 
     int f_ok = 0, f_pt = 0;
-    char rev[255];
+    // char rev[255];
     int ret;
     pthread_t calcu;
 
     printf("wuhu\n");
+    srand(time(NULL));
 
     for (int i = 0; i < 100; i++) {
         f_ok = 0;
-        ret = recv(sclient, rev, 255, 0);
+        ret = recv(sclient, (char*)(&buf), sizeof(block), 0);
         printf("rev over\n");
         if (ret > 0) {
-            rev[ret] = 0x00;
+            // rev[ret] = 0x00;
             // printf(recData);
-            printf("%s\n", rev);
+            // printf("%s\n", rev);
         } else
             printf("rev defealt\n");
-        if (strcmp(rev, "ok") == 0) {
+        if (strncmp((char*)(&buf), "ok", 2) == 0) {
             printf("ok rev\n");
             if ((f_pt == 1) && (send_data == 0)) {
                 pthread_cancel(calcu);
                 printf("cancel\n");
             }
-            ret = recv(sclient, rev, 255, 0);
+            ret = recv(sclient, (char*)(&buf), sizeof(buf), 0);
             if (ret > 0) {
-                rev[ret] = 0x00;
+                printf("revvvvvvvvvv\n");
+                // rev[ret] = 0x00;
                 // printf(recData);
-                printf("%s\n", rev);
+                // printf("%s\n", rev);
             } else
                 printf("rev defealt\n");
         }
         f_pt = 1;
         printf("calcu start\n");
-        pthread_create(&calcu, NULL, calculate, rev);
+        pthread_create(&calcu, NULL, calculate, NULL);
         send_data = 0;
         /*
         char  sendData[20] = "client";
